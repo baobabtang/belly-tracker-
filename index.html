@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Belly Tracker</title>
+  <!-- Apple Web App meta tags for native look -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Belly Tracker">
+  <!-- Chart.js for graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      padding-bottom: 60px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+      background-color: #fafafa;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      background-color: #fff;
+    }
+
+    .range-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .range-container input[type="range"] {
+      flex: 1;
+    }
+
+    .range-val {
+      font-weight: 700;
+      font-size: 1.1rem;
+      width: 28px;
+      text-align: center;
+    }
+
+    button.btn-primary {
+      width: 100%;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    button.btn-primary:active {
+      opacity: 0.85;
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-secondary:active {
+      background: #f1f5f9;
+    }
+
+    .log-item {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .log-item:last-child {
+      border-bottom: none;
+    }
+
+    .log-category {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #e0f2fe;
+      color: #0369a1;
+      margin-bottom: 4px;
+    }
+
+    .log-time {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .log-details {
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    .log-score {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: #eff6ff;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Belly Tracker</h1>
+  <p class="subtitle">Log symptoms, food & gut health</p>
+
+  <!-- Quick Action Buttons -->
+  <div class="actions-row">
+    <button class="btn-secondary" onclick="exportToCSV()">📥 Export to Excel (.csv)</button>
+    <button class="btn-secondary" onclick="clearAllData()">🗑️ Reset Data</button>
+  </div>
+
+  <!-- Form Card -->
+  <div class="card">
+    <h2>➕ New Entry</h2>
+    <form id="trackerForm">
+      <div class="form-group">
+        <label>Date & Time</label>
+        <input type="datetime-local" id="entryDate" required>
+      </div>
+
+      <div class="form-group">
+        <label>Category</label>
+        <select id="entryCategory" required>
+          <option value="Food / Meal">🍽️ Food / Meal</option>
+          <option value="Belly Symptom (Pain/Bloating)">⚡ Belly Symptom</option>
+          <option value="Stool / Bowel Movement">🚽 Stool / Bowel Movement</option>
+          <option value="Mood / Stress">🧠 Mood / Stress</option>
+          <option value="Medication / Supplement">💊 Medication / Supplement</option>
+          <option value="Other">📝 Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Feeling / Severity (1 = Worst, 5 = Great)</label>
+        <div class="range-container">
+          <input type="range" id="entryScore" min="1" max="5" value="3" oninput="document.getElementById('scoreVal').innerText = this.value">
+          <span class="range-val" id="scoreVal">3</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Details / Notes</label>
+        <textarea id="entryNotes" rows="2" placeholder="e.g., Ate sourdough bread; felt bloated 30 min later..."></textarea>
+      </div>
+
+      <button type="submit" class="btn-primary">Save Entry</button>
+    </form>
+  </div>
+
+  <!-- Graph Card -->
+  <div class="card">
+    <h2>📈 Comfort Trend (Last Entries)</h2>
+    <canvas id="trendChart" height="200"></canvas>
+  </div>
+
+  <!-- Log Card -->
+  <div class="card">
+    <h2>📜 Recent Entries</h2>
+    <div id="logsContainer">
+      <p style="color: var(--text-muted); font-size: 0.9rem;">No entries yet. Add your first log above!</p>
+    </div>
+  </div>
+
+  <script>
+    // Initialize date to right now in local time
+    function setNow() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('entryDate').value = now.toISOString().slice(0, 16);
+    }
+    setNow();
+
+    // Data handling
+    let logs = JSON.parse(localStorage.getItem('belly_logs')) || [];
+
+    // Chart Setup
+    let chart;
+    function initChart() {
+      const ctx = document.getElementById('trendChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Feeling / Comfort (1 to 5)',
+            data: [],
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            tension: 0.3,
+            fill: true,
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              min: 1,
+              max: 5,
+              ticks: { stepSize: 1 }
+            }
+          }
+        }
+      });
+      updateChart();
+    }
+
+    function updateChart() {
+      if (!chart) return;
+      // Take the last 10 entries in chronological order
+      const sorted = [...logs].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-10);
+      chart.data.labels = sorted.map(e => e.date.replace('T', ' ').slice(5));
+      chart.data.datasets[0].data = sorted.map(e => e.score);
+      chart.update();
+    }
+
+    function renderLogs() {
+      const container = document.getElementById('logsContainer');
+      if (logs.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No entries yet. Add your first log above!</p>';
+        return;
+      }
+
+      container.innerHTML = logs.map((log) => `
+        <div class="log-item">
+          <div>
+            <span class="log-category">${log.category}</span>
+            <div class="log-time">${new Date(log.date).toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</div>
+            <div class="log-details">${log.notes ? log.notes : '<em>No extra notes</em>'}</div>
+          </div>
+          <div class="log-score">${log.score}</div>
+        </div>
+      `).join('');
+    }
+
+    // Save Form Entry
+    document.getElementById('trackerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const newEntry = {
+        id: Date.now(),
+        date: document.getElementById('entryDate').value,
+        category: document.getElementById('entryCategory').value,
+        score: parseInt(document.getElementById('entryScore').value),
+        notes: document.getElementById('entryNotes').value.trim()
+      };
+
+      // Add newest at the front
+      logs.unshift(newEntry);
+      localStorage.setItem('belly_logs', JSON.stringify(logs));
+
+      // Reset fields
+      document.getElementById('entryNotes').value = '';
+      setNow();
+
+      renderLogs();
+      updateChart();
+    });
+
+    // Export to Excel / CSV
+    function exportToCSV() {
+      if (logs.length === 0) {
+        alert("No entries to export yet!");
+        return;
+      }
+
+      const headers = ["Date & Time", "Category", "Feeling / Score (1-5)", "Notes"];
+      const rows = logs.map(l => [
+        `"${l.date.replace('T', ' ')}"`,
+        `"${l.category.replace(/"/g, '""')}"`,
+        l.score,
+        `"${l.notes.replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `belly_tracker_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Clear Data
+    function clearAllData() {
+      if (confirm("Are you sure you want to delete all entries?")) {
+        logs = [];
+        localStorage.removeItem('belly_logs');
+        renderLogs();
+        updateChart();
+      }
+    }
+
+    // Initial load
+    window.onload = function() {
+      renderLogs();
+      initChart();
+    };
+  </script>
+</body>
+</html>
