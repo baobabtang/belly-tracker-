@@ -3,402 +3,499 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Belly Tracker</title>
-  <!-- Apple Web App meta tags for native look -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Belly Tracker">
-  <!-- Chart.js for graphs -->
+  <title>Belly Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root {
-      --primary: #2563eb;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --radius: 14px;
-    }
-
-    * {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
-      background-color: var(--bg);
-      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
       padding: 16px;
-      padding-bottom: 60px;
-      max-width: 500px;
-      margin: 0 auto;
+      background: #f4f6f8;
+      color: #222;
+      padding-bottom: 70px;
     }
-
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    p.subtitle {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-    }
-
+    h1, h2, h3 { text-align: center; margin: 10px 0; }
     .card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 18px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-
-    .card h2 {
-      font-size: 1.1rem;
-      margin-bottom: 14px;
-    }
-
-    .form-group {
-      margin-bottom: 14px;
-    }
-
-    label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text-muted);
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 1rem;
-      background-color: #fafafa;
-      outline: none;
-      -webkit-appearance: none;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--primary);
-      background-color: #fff;
-    }
-
-    .range-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .range-container input[type="range"] {
-      flex: 1;
-    }
-
-    .range-val {
-      font-weight: 700;
-      font-size: 1.1rem;
-      width: 28px;
-      text-align: center;
-    }
-
-    button.btn-primary {
-      width: 100%;
-      background-color: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      padding: 14px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-
-    button.btn-primary:active {
-      opacity: 0.85;
-    }
-
-    .actions-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .btn-secondary {
-      flex: 1;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .btn-secondary:active {
-      background: #f1f5f9;
-    }
-
-    .log-item {
-      border-bottom: 1px solid var(--border);
-      padding: 12px 0;
+    label { display: block; font-weight: 600; margin-top: 12px; margin-bottom: 4px; font-size: 14px; }
+    .slider-labels {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      font-size: 11px;
+      color: #777;
+      margin-top: -2px;
     }
-
-    .log-item:last-child {
-      border-bottom: none;
-    }
-
-    .log-category {
-      display: inline-block;
-      font-size: 0.75rem;
+    .score-badge {
+      font-size: 13px;
       font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 20px;
-      background: #e0f2fe;
-      color: #0369a1;
-      margin-bottom: 4px;
+      color: #007aff;
+      float: right;
     }
-
-    .log-time {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .log-details {
-      font-size: 0.95rem;
+    input, select, textarea, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
       margin-top: 4px;
     }
-
-    .log-score {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--primary);
-      background: #eff6ff;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
+    textarea { resize: vertical; min-height: 65px; }
+    button {
+      background: #007aff;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      margin-top: 14px;
+    }
+    button:active { opacity: 0.8; }
+    .btn-secondary { background: #34c759; margin-top: 10px; }
+    .btn-cancel { background: #8e8e93; margin-top: 8px; }
+    .btn-lock { background: #3a3a3c; margin-top: 20px; font-size: 13px; }
+    .entry-item {
+      border-bottom: 1px solid #eee;
+      padding: 12px 0;
+      font-size: 14px;
+    }
+    .entry-item:last-child { border-bottom: none; }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      background: #e5e5ea;
+    }
+    .metrics-summary {
       display: flex;
-      align-items: center;
+      gap: 12px;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #555;
+    }
+    .edit-btn {
+      width: auto;
+      padding: 5px 12px;
+      font-size: 12px;
+      margin: 0;
+      background: #007aff;
+      float: right;
+    }
+    #editingBanner {
+      display: none;
+      background: #fff3cd;
+      color: #856404;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      text-align: center;
+      font-weight: 600;
+    }
+    /* Lock Screen Overlay */
+    #lockScreen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
       justify-content: center;
+      align-items: center;
+      padding: 24px;
+      z-index: 9999;
+    }
+    .pin-input {
+      text-align: center;
+      letter-spacing: 14px;
+      font-size: 26px;
+      max-width: 200px;
     }
   </style>
 </head>
 <body>
 
-  <h1>Belly Tracker</h1>
-  <p class="subtitle">Log symptoms, food & gut health</p>
-
-  <!-- Quick Action Buttons -->
-  <div class="actions-row">
-    <button class="btn-secondary" onclick="exportToCSV()">📥 Export to Excel (.csv)</button>
-    <button class="btn-secondary" onclick="clearAllData()">🗑️ Reset Data</button>
+  <!-- Passcode Screen -->
+  <div id="lockScreen">
+    <div style="font-size: 40px; margin-bottom: 8px;">🔒</div>
+    <h2 id="pinTitle">Enter Passcode</h2>
+    <p id="pinSub" style="color: #666; font-size: 13px; text-align: center;">Enter your 4-digit PIN</p>
+    <input type="password" id="pinInput" class="pin-input" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="••••" autofocus>
+    <button style="max-width: 200px;" onclick="verifyPin()">Unlock</button>
   </div>
 
-  <!-- Form Card -->
-  <div class="card">
-    <h2>➕ New Entry</h2>
-    <form id="trackerForm">
-      <div class="form-group">
-        <label>Date & Time</label>
-        <input type="datetime-local" id="entryDate" required>
+  <!-- Main App -->
+  <div id="appContent" style="display: none;">
+    <h1>🌿 Belly Tracker</h1>
+
+    <div class="card" id="formCard">
+      <div id="editingBanner">✏️ Editing an existing entry</div>
+      <h2 id="formTitle">Add Entry</h2>
+      
+      <input type="hidden" id="editingId" value="">
+
+      <label>Date & Time</label>
+      <input type="datetime-local" id="entryDate">
+
+      <label>Category</label>
+      <select id="entryType">
+        <option value="Food">🍽️ Food / Meal</option>
+        <option value="Stool">🚽 Stool / Bowel Movement</option>
+        <option value="Mood">💭 Mood / Mind</option>
+        <option value="Pain">⚡ Pain / Flare-up</option>
+        <option value="Medication">💊 Medication</option>
+        <option value="Other">📝 Other</option>
+      </select>
+
+      <label>Notes & Details</label>
+      <textarea id="entryDetails" placeholder="What did you eat, Bristol stool type, symptoms..."></textarea>
+
+      <!-- Indicator 1: Mood -->
+      <label>Mood <span class="score-badge" id="moodVal">3 / 5</span></label>
+      <input type="range" id="entryMood" min="1" max="5" value="3" oninput="moodVal.innerText = this.value + ' / 5'">
+      <div class="slider-labels">
+        <span>1: Low / Anxious</span>
+        <span>5: Great / Calm</span>
       </div>
 
-      <div class="form-group">
-        <label>Category</label>
-        <select id="entryCategory" required>
-          <option value="Food / Meal">🍽️ Food / Meal</option>
-          <option value="Belly Symptom (Pain/Bloating)">⚡ Belly Symptom</option>
-          <option value="Stool / Bowel Movement">🚽 Stool / Bowel Movement</option>
-          <option value="Mood / Stress">🧠 Mood / Stress</option>
-          <option value="Medication / Supplement">💊 Medication / Supplement</option>
-          <option value="Other">📝 Other</option>
-        </select>
+      <!-- Indicator 2: Discomfort -->
+      <label>Discomfort / Bloating <span class="score-badge" id="discVal">1 / 5</span></label>
+      <input type="range" id="entryDiscomfort" min="1" max="5" value="1" oninput="discVal.innerText = this.value + ' / 5'">
+      <div class="slider-labels">
+        <span>1: None</span>
+        <span>5: Severe</span>
       </div>
 
-      <div class="form-group">
-        <label>Feeling / Severity (1 = Worst, 5 = Great)</label>
-        <div class="range-container">
-          <input type="range" id="entryScore" min="1" max="5" value="3" oninput="document.getElementById('scoreVal').innerText = this.value">
-          <span class="range-val" id="scoreVal">3</span>
-        </div>
+      <!-- Indicator 3: Pain -->
+      <label>Pain Severity <span class="score-badge" id="painVal">1 / 5</span></label>
+      <input type="range" id="entryPain" min="1" max="5" value="1" oninput="painVal.innerText = this.value + ' / 5'">
+      <div class="slider-labels">
+        <span>1: None</span>
+        <span>5: Intense / Severe</span>
       </div>
 
-      <div class="form-group">
-        <label>Details / Notes</label>
-        <textarea id="entryNotes" rows="2" placeholder="e.g., Ate sourdough bread; felt bloated 30 min later..."></textarea>
-      </div>
+      <button id="saveBtn" onclick="saveEntry()">Save Entry</button>
+      <button id="cancelEditBtn" class="btn-cancel" style="display:none;" onclick="cancelEditing()">Cancel Edit</button>
+    </div>
 
-      <button type="submit" class="btn-primary">Save Entry</button>
-    </form>
-  </div>
+    <!-- Charts -->
+    <div class="card">
+      <h2>Trends Over Time</h2>
 
-  <!-- Graph Card -->
-  <div class="card">
-    <h2>📈 Comfort Trend (Last Entries)</h2>
-    <canvas id="trendChart" height="200"></canvas>
-  </div>
+      <h3 style="font-size: 14px; color: #28a745; margin-top: 15px;">😊 Mood Trend (High is Good)</h3>
+      <canvas id="moodChart" height="150"></canvas>
 
-  <!-- Log Card -->
-  <div class="card">
-    <h2>📜 Recent Entries</h2>
-    <div id="logsContainer">
-      <p style="color: var(--text-muted); font-size: 0.9rem;">No entries yet. Add your first log above!</p>
+      <h3 style="font-size: 14px; color: #fd7e14; margin-top: 25px;">🎈 Discomfort Trend (Low is Good)</h3>
+      <canvas id="discChart" height="150"></canvas>
+
+      <h3 style="font-size: 14px; color: #dc3545; margin-top: 25px;">⚡ Pain Severity Trend (Low is Good)</h3>
+      <canvas id="painChart" height="150"></canvas>
+    </div>
+
+    <!-- History -->
+    <div class="card">
+      <h2>History & Records</h2>
+      <button class="btn-secondary" onclick="exportToCSV()">📥 Export to Excel (CSV)</button>
+      <div id="entriesList" style="margin-top: 14px;"></div>
+      <button class="btn-lock" onclick="lockApp()">🔒 Lock App</button>
     </div>
   </div>
 
   <script>
-    // Initialize date to right now in local time
+    // --- PIN AUTHENTICATION ---
+    const savedPin = localStorage.getItem('app_pin');
+    const pinTitle = document.getElementById('pinTitle');
+    const pinSub = document.getElementById('pinSub');
+    const pinInput = document.getElementById('pinInput');
+
+    if (!savedPin) {
+      pinTitle.innerText = "Set a 4-Digit Passcode";
+      pinSub.innerText = "Create a PIN to secure your health diary";
+    }
+
+    function verifyPin() {
+      const pin = pinInput.value.trim();
+      if (pin.length !== 4 || isNaN(pin)) {
+        alert("Please enter a 4-digit number.");
+        return;
+      }
+      if (!savedPin) {
+        localStorage.setItem('app_pin', pin);
+        unlockApp();
+      } else if (pin === savedPin) {
+        unlockApp();
+      } else {
+        alert("Incorrect PIN");
+        pinInput.value = '';
+      }
+    }
+
+    pinInput.addEventListener('keyup', () => {
+      if (pinInput.value.length === 4) verifyPin();
+    });
+
+    function unlockApp() {
+      document.getElementById('lockScreen').style.display = 'none';
+      document.getElementById('appContent').style.display = 'block';
+      initApp();
+    }
+
+    function lockApp() {
+      pinInput.value = '';
+      document.getElementById('lockScreen').style.display = 'flex';
+      document.getElementById('appContent').style.display = 'none';
+    }
+
+    // --- DATA HANDLING ---
+    function getEntries() {
+      return JSON.parse(localStorage.getItem('belly_entries') || '[]');
+    }
+
+    function saveEntries(arr) {
+      localStorage.setItem('belly_entries', JSON.stringify(arr));
+    }
+
     function setNow() {
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       document.getElementById('entryDate').value = now.toISOString().slice(0, 16);
     }
-    setNow();
 
-    // Data handling
-    let logs = JSON.parse(localStorage.getItem('belly_logs')) || [];
-
-    // Chart Setup
-    let chart;
-    function initChart() {
-      const ctx = document.getElementById('trendChart').getContext('2d');
-      chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [{
-            label: 'Feeling / Comfort (1 to 5)',
-            data: [],
-            borderColor: '#2563eb',
-            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-            tension: 0.3,
-            fill: true,
-            pointRadius: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              min: 1,
-              max: 5,
-              ticks: { stepSize: 1 }
-            }
-          }
-        }
-      });
-      updateChart();
+    function initApp() {
+      setNow();
+      renderList();
+      renderCharts();
     }
 
-    function updateChart() {
-      if (!chart) return;
-      // Take the last 10 entries in chronological order
-      const sorted = [...logs].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-10);
-      chart.data.labels = sorted.map(e => e.date.replace('T', ' ').slice(5));
-      chart.data.datasets[0].data = sorted.map(e => e.score);
-      chart.update();
-    }
+    function saveEntry() {
+      const id = document.getElementById('editingId').value;
+      const date = document.getElementById('entryDate').value;
+      const type = document.getElementById('entryType').value;
+      const details = document.getElementById('entryDetails').value;
+      const mood = parseInt(document.getElementById('entryMood').value);
+      const discomfort = parseInt(document.getElementById('entryDiscomfort').value);
+      const pain = parseInt(document.getElementById('entryPain').value);
 
-    function renderLogs() {
-      const container = document.getElementById('logsContainer');
-      if (logs.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No entries yet. Add your first log above!</p>';
+      if (!details.trim()) {
+        alert("Please add notes or a description.");
         return;
       }
 
-      container.innerHTML = logs.map((log) => `
-        <div class="log-item">
-          <div>
-            <span class="log-category">${log.category}</span>
-            <div class="log-time">${new Date(log.date).toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</div>
-            <div class="log-details">${log.notes ? log.notes : '<em>No extra notes</em>'}</div>
+      let entries = getEntries();
+
+      if (id) {
+        // Update existing entry
+        entries = entries.map(item => {
+          if (item.id === id) {
+            return { ...item, date, type, details, mood, discomfort, pain };
+          }
+          return item;
+        });
+        cancelEditing();
+      } else {
+        // New entry
+        entries.push({
+          id: Date.now().toString(),
+          date,
+          type,
+          details,
+          mood,
+          discomfort,
+          pain
+        });
+        resetForm();
+      }
+
+      saveEntries(entries);
+      renderList();
+      renderCharts();
+    }
+
+    function startEdit(id) {
+      const entries = getEntries();
+      const item = entries.find(e => e.id === id);
+      if (!item) return;
+
+      document.getElementById('editingId').value = item.id;
+      document.getElementById('entryDate').value = item.date;
+      document.getElementById('entryType').value = item.type;
+      document.getElementById('entryDetails').value = item.details;
+      
+      document.getElementById('entryMood').value = item.mood || 3;
+      document.getElementById('moodVal').innerText = (item.mood || 3) + ' / 5';
+
+      document.getElementById('entryDiscomfort').value = item.discomfort || 1;
+      document.getElementById('discVal').innerText = (item.discomfort || 1) + ' / 5';
+
+      document.getElementById('entryPain').value = item.pain || 1;
+      document.getElementById('painVal').innerText = (item.pain || 1) + ' / 5';
+
+      document.getElementById('editingBanner').style.display = 'block';
+      document.getElementById('formTitle').innerText = 'Edit Entry';
+      document.getElementById('saveBtn').innerText = 'Update Entry';
+      document.getElementById('cancelEditBtn').style.display = 'block';
+
+      // Scroll to top to make editing obvious
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelEditing() {
+      document.getElementById('editingId').value = '';
+      document.getElementById('editingBanner').style.display = 'none';
+      document.getElementById('formTitle').innerText = 'Add Entry';
+      document.getElementById('saveBtn').innerText = 'Save Entry';
+      document.getElementById('cancelEditBtn').style.display = 'none';
+      resetForm();
+    }
+
+    function resetForm() {
+      setNow();
+      document.getElementById('entryDetails').value = '';
+      document.getElementById('entryMood').value = 3;
+      document.getElementById('moodVal').innerText = '3 / 5';
+      document.getElementById('entryDiscomfort').value = 1;
+      document.getElementById('discVal').innerText = '1 / 5';
+      document.getElementById('entryPain').value = 1;
+      document.getElementById('painVal').innerText = '1 / 5';
+    }
+
+    function renderList() {
+      const entries = getEntries().slice().reverse();
+      const listEl = document.getElementById('entriesList');
+      if (entries.length === 0) {
+        listEl.innerHTML = '<p style="color:#888; text-align:center;">No entries yet.</p>';
+        return;
+      }
+
+      listEl.innerHTML = entries.map(item => `
+        <div class="entry-item">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <div>
+              <span class="badge">${item.type}</span>
+              <span style="color:#666; font-size:12px; margin-left:6px;">${item.date.replace('T', ' ')}</span>
+            </div>
+            <button class="edit-btn" onclick="startEdit('${item.id}')">Edit</button>
           </div>
-          <div class="log-score">${log.score}</div>
+          <div style="margin-top: 4px;">${item.details}</div>
+          <div class="metrics-summary">
+            <span>Mood: <b>${item.mood || '-'}</b>/5</span>
+            <span>Discomfort: <b>${item.discomfort || '-'}</b>/5</span>
+            <span>Pain: <b>${item.pain || '-'}</b>/5</span>
+          </div>
         </div>
       `).join('');
     }
 
-    // Save Form Entry
-    document.getElementById('trackerForm').addEventListener('submit', function(e) {
-      e.preventDefault();
+    // --- CHARTS ---
+    let moodChartInstance = null;
+    let discChartInstance = null;
+    let painChartInstance = null;
 
-      const newEntry = {
-        id: Date.now(),
-        date: document.getElementById('entryDate').value,
-        category: document.getElementById('entryCategory').value,
-        score: parseInt(document.getElementById('entryScore').value),
-        notes: document.getElementById('entryNotes').value.trim()
+    function renderCharts() {
+      const entries = getEntries();
+      const labels = entries.map(e => e.date.slice(5).replace('T', ' '));
+
+      const moods = entries.map(e => e.mood || null);
+      const discomforts = entries.map(e => e.discomfort || null);
+      const pains = entries.map(e => e.pain || null);
+
+      const commonOptions = {
+        responsive: true,
+        scales: {
+          y: {
+            min: 1,
+            max: 5,
+            ticks: { stepSize: 1 }
+          }
+        }
       };
 
-      // Add newest at the front
-      logs.unshift(newEntry);
-      localStorage.setItem('belly_logs', JSON.stringify(logs));
+      // 1. Mood Chart (Green)
+      const ctxMood = document.getElementById('moodChart').getContext('2d');
+      if (moodChartInstance) moodChartInstance.destroy();
+      moodChartInstance = new Chart(ctxMood, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Mood (1=Low, 5=Great)',
+            data: moods,
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            fill: true,
+            tension: 0.25
+          }]
+        },
+        options: commonOptions
+      });
 
-      // Reset fields
-      document.getElementById('entryNotes').value = '';
-      setNow();
+      // 2. Discomfort Chart (Orange)
+      const ctxDisc = document.getElementById('discChart').getContext('2d');
+      if (discChartInstance) discChartInstance.destroy();
+      discChartInstance = new Chart(ctxDisc, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Discomfort (1=None, 5=Severe)',
+            data: discomforts,
+            borderColor: '#fd7e14',
+            backgroundColor: 'rgba(253, 126, 20, 0.1)',
+            fill: true,
+            tension: 0.25
+          }]
+        },
+        options: commonOptions
+      });
 
-      renderLogs();
-      updateChart();
-    });
+      // 3. Pain Chart (Red)
+      const ctxPain = document.getElementById('painChart').getContext('2d');
+      if (painChartInstance) painChartInstance.destroy();
+      painChartInstance = new Chart(ctxPain, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Pain Severity (1=None, 5=Severe)',
+            data: pains,
+            borderColor: '#dc3545',
+            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            fill: true,
+            tension: 0.25
+          }]
+        },
+        options: commonOptions
+      });
+    }
 
-    // Export to Excel / CSV
+    // --- CSV EXPORT ---
     function exportToCSV() {
-      if (logs.length === 0) {
-        alert("No entries to export yet!");
+      const entries = getEntries();
+      if (!entries.length) {
+        alert("No data to export!");
         return;
       }
+      let csv = "Date,Type,Details,Mood (1-5),Discomfort (1-5),Pain (1-5)\n";
+      entries.forEach(e => {
+        csv += `"${e.date}","${e.type}","${(e.details || '').replace(/"/g, '""')}","${e.mood || ''}","${e.discomfort || ''}","${e.pain || ''}"\n`;
+      });
 
-      const headers = ["Date & Time", "Category", "Feeling / Score (1-5)", "Notes"];
-      const rows = logs.map(l => [
-        `"${l.date.replace('T', ' ')}"`,
-        `"${l.category.replace(/"/g, '""')}"`,
-        l.score,
-        `"${l.notes.replace(/"/g, '""')}"`
-      ]);
-
-      const csvContent = "data:text/csv;charset=utf-8," 
-        + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-
-      const encodedUri = encodeURI(csvContent);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `belly_tracker_${new Date().toISOString().slice(0,10)}.csv`);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "belly_tracker_data.csv");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
-
-    // Clear Data
-    function clearAllData() {
-      if (confirm("Are you sure you want to delete all entries?")) {
-        logs = [];
-        localStorage.removeItem('belly_logs');
-        renderLogs();
-        updateChart();
-      }
-    }
-
-    // Initial load
-    window.onload = function() {
-      renderLogs();
-      initChart();
-    };
   </script>
 </body>
 </html>
