@@ -2,500 +2,886 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Belly Tracker</title>
+  
+  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/baobabtang/belly-tracker-/main/icon.png">
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/baobabtang/belly-tracker-/main/icon.png">
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0;
-      padding: 16px;
-      background: #f4f6f8;
-      color: #222;
-      padding-bottom: 70px;
+    :root {
+      --bg: #F2F2F7;
+      --card-bg: #FFFFFF;
+      --tint: #007AFF;
+      --tint-hover: #0056b3;
+      --text: #000000;
+      --secondary-text: #8E8E93;
+      --border: #E5E5EA;
+      --danger: #FF3B30;
+      --success: #34C759;
+      --warning: #FF9500;
+      --purple: #AF52DE;
     }
-    h1, h2, h3 { text-align: center; margin: 10px 0; }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+      padding: env(safe-area-inset-top, 20px) 16px calc(env(safe-area-inset-bottom, 20px) + 80px) 16px;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-top: 10px;
+      margin-bottom: 14px;
+      letter-spacing: -0.5px;
+    }
+
+    h2 {
+      font-size: 19px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    /* Tabs */
+    .tab-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 10px calc(env(safe-area-inset-bottom, 10px) + 4px) 10px;
+      z-index: 1000;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .tab-button {
+      background: none;
+      border: none;
+      font-size: 11px;
+      color: var(--secondary-text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-weight: 500;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .tab-button.active {
+      color: var(--tint);
+      font-weight: 700;
+    }
+
+    .tab-button svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .tab-content {
+      display: none;
+      width: 100%;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Cards */
     .card {
-      background: #fff;
+      background: var(--card-bg);
       border-radius: 14px;
       padding: 16px;
       margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      width: 100%;
     }
-    label { display: block; font-weight: 600; margin-top: 12px; margin-bottom: 4px; font-size: 14px; }
-    .slider-labels {
+
+    /* Form Inputs */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--secondary-text);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 6px;
+    }
+
+    .datetime-row {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .datetime-row input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 16px;
+      border: 1px solid var(--border);
+      background: #FAFAFC;
+      border-radius: 10px;
+      color: var(--text);
+      -webkit-appearance: none;
+      appearance: none;
+      font-family: inherit;
+    }
+
+    select {
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%238E8E93" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 18px;
+      padding-right: 36px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    /* Rating Steppers */
+    .rating-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .rating-btn {
+      flex: 1;
+      height: 42px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: #FAFAFC;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .rating-btn.active-mood {
+      background: var(--tint);
+      color: #fff;
+      border-color: var(--tint);
+    }
+
+    .rating-btn.active-discomfort {
+      background: var(--warning);
+      color: #fff;
+      border-color: var(--warning);
+    }
+
+    .rating-btn.active-pain {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+    }
+
+    .scale-legend {
       display: flex;
       justify-content: space-between;
       font-size: 11px;
-      color: #777;
-      margin-top: -2px;
-    }
-    .score-badge {
-      font-size: 13px;
-      font-weight: 700;
-      color: #007aff;
-      float: right;
-    }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 16px;
+      color: var(--secondary-text);
       margin-top: 4px;
+      padding: 0 2px;
     }
-    textarea { resize: vertical; min-height: 65px; }
-    button {
-      background: #007aff;
-      color: white;
-      font-weight: bold;
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 600;
       border: none;
       cursor: pointer;
-      margin-top: 14px;
-    }
-    button:active { opacity: 0.8; }
-    .btn-secondary { background: #34c759; margin-top: 10px; }
-    .btn-cancel { background: #8e8e93; margin-top: 8px; }
-    .btn-lock { background: #3a3a3c; margin-top: 20px; font-size: 13px; }
-    .entry-item {
-      border-bottom: 1px solid #eee;
-      padding: 12px 0;
-      font-size: 14px;
-    }
-    .entry-item:last-child { border-bottom: none; }
-    .badge {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: bold;
-      background: #e5e5ea;
-    }
-    .metrics-summary {
       display: flex;
-      gap: 12px;
-      margin-top: 6px;
-      font-size: 12px;
-      color: #555;
-    }
-    .edit-btn {
-      width: auto;
-      padding: 5px 12px;
-      font-size: 12px;
-      margin: 0;
-      background: #007aff;
-      float: right;
-    }
-    #editingBanner {
-      display: none;
-      background: #fff3cd;
-      color: #856404;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      font-size: 13px;
-      text-align: center;
-      font-weight: 600;
-    }
-    /* Lock Screen Overlay */
-    #lockScreen {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #ffffff;
-      display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 24px;
-      z-index: 9999;
+      gap: 8px;
     }
-    .pin-input {
-      text-align: center;
-      letter-spacing: 14px;
-      font-size: 26px;
-      max-width: 200px;
+
+    .btn-primary {
+      background: var(--tint);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #E5E5EA;
+      color: var(--text);
+      margin-top: 10px;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+      margin-top: 10px;
+    }
+
+    /* Carousel for Evolution Charts */
+    .carousel-nav {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      background: #E5E5EA;
+      padding: 3px;
+      border-radius: 9px;
+    }
+
+    .carousel-tab {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--secondary-text);
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .carousel-tab.active {
+      background: #FFFFFF;
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .swipe-container {
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .swipe-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .swipe-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      scroll-snap-align: start;
+    }
+
+    .chart-box {
+      position: relative;
+      height: 250px;
+      width: 100%;
+    }
+
+    /* History Records */
+    .history-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      position: relative;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #E5E5EA;
+      color: #333;
+    }
+
+    .badge.Food { background: #E1F5FE; color: #0288D1; }
+    .badge.Stool { background: #EFEBE9; color: #5D4037; }
+    .badge.Medication { background: #EDE7F6; color: #512DA8; }
+    .badge.Symptom { background: #FFEBEE; color: #C62828; }
+
+    .scores-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    .score-chip {
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .chip-mood { background: #E3F2FD; color: #1565C0; }
+    .chip-discomfort { background: #FFF3E0; color: #E65100; }
+    .chip-pain { background: #FFEBEE; color: #C62828; }
+
+    .history-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .action-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* Hidden file input */
+    #csvFileInput {
+      display: none;
     }
   </style>
 </head>
 <body>
 
-  <!-- Passcode Screen -->
-  <div id="lockScreen">
-    <div style="font-size: 40px; margin-bottom: 8px;">🔒</div>
-    <h2 id="pinTitle">Enter Passcode</h2>
-    <p id="pinSub" style="color: #666; font-size: 13px; text-align: center;">Enter your 4-digit PIN</p>
-    <input type="password" id="pinInput" class="pin-input" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="••••" autofocus>
-    <button style="max-width: 200px;" onclick="verifyPin()">Unlock</button>
+  <!-- TAB 1: ADD ENTRY -->
+  <div id="tab-log" class="tab-content active">
+    <h1 id="form-title">Log Entry</h1>
+    
+    <div class="card">
+      <form id="entry-form">
+        <input type="hidden" id="entry-id">
+
+        <div class="form-group">
+          <label>Date & Time</label>
+          <div class="datetime-row">
+            <input type="date" id="date" required>
+            <input type="time" id="time" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Category</label>
+          <select id="category" required>
+            <option value="Food">🍽️ Food / Drink</option>
+            <option value="Stool">💩 Stool</option>
+            <option value="Symptom">⚠️ Pain / Symptom</option>
+            <option value="Medication">💊 Medication</option>
+            <option value="Note">📝 General Note</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Details / Notes</label>
+          <textarea id="notes" placeholder="What did you eat, how did your belly react, Bristol scale, etc."></textarea>
+        </div>
+
+        <!-- Indicator 1: Mood -->
+        <div class="form-group">
+          <label>1. Mood (1 = Bad, 5 = Happy)</label>
+          <div class="rating-row" id="mood-selector">
+            <button type="button" class="rating-btn" data-val="1">1</button>
+            <button type="button" class="rating-btn" data-val="2">2</button>
+            <button type="button" class="rating-btn" data-val="3">3</button>
+            <button type="button" class="rating-btn" data-val="4">4</button>
+            <button type="button" class="rating-btn" data-val="5">5</button>
+          </div>
+          <div class="scale-legend"><span>Depressed / Down</span><span>Great / Cheerful</span></div>
+        </div>
+
+        <!-- Indicator 2: Discomfort -->
+        <div class="form-group">
+          <label>2. Belly Comfort (1 = Unbearable, 5 = Very Good)</label>
+          <div class="rating-row" id="discomfort-selector">
+            <button type="button" class="rating-btn" data-val="1">1</button>
+            <button type="button" class="rating-btn" data-val="2">2</button>
+            <button type="button" class="rating-btn" data-val="3">3</button>
+            <button type="button" class="rating-btn" data-val="4">4</button>
+            <button type="button" class="rating-btn" data-val="5">5</button>
+          </div>
+          <div class="scale-legend"><span>Bloated / Heavy (Worst)</span><span>Light & Relaxed (Best)</span></div>
+        </div>
+
+        <!-- Indicator 3: Pain Severity -->
+        <div class="form-group">
+          <label>3. Pain Comfort (1 = Severe Pain, 5 = Pain Free)</label>
+          <div class="rating-row" id="pain-selector">
+            <button type="button" class="rating-btn" data-val="1">1</button>
+            <button type="button" class="rating-btn" data-val="2">2</button>
+            <button type="button" class="rating-btn" data-val="3">3</button>
+            <button type="button" class="rating-btn" data-val="4">4</button>
+            <button type="button" class="rating-btn" data-val="5">5</button>
+          </div>
+          <div class="scale-legend"><span>Severe Cramps (Worst)</span><span>No Pain at all (Best)</span></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="save-button">Save Entry</button>
+        <button type="button" class="btn btn-secondary" id="cancel-edit" style="display:none;">Cancel Edit</button>
+      </form>
+    </div>
   </div>
 
-  <!-- Main App -->
-  <div id="appContent" style="display: none;">
-    <h1>🌿 Belly Tracker</h1>
+  <!-- TAB 2: EVOLUTION / TRENDS (SWIPEABLE) -->
+  <div id="tab-trends" class="tab-content">
+    <h1>Evolution & Trends</h1>
 
-    <div class="card" id="formCard">
-      <div id="editingBanner">✏️ Editing an existing entry</div>
-      <h2 id="formTitle">Add Entry</h2>
-      
-      <input type="hidden" id="editingId" value="">
-
-      <label>Date & Time</label>
-      <input type="datetime-local" id="entryDate">
-
-      <label>Category</label>
-      <select id="entryType">
-        <option value="Food">🍽️ Food / Meal</option>
-        <option value="Stool">🚽 Stool / Bowel Movement</option>
-        <option value="Mood">💭 Mood / Mind</option>
-        <option value="Pain">⚡ Pain / Flare-up</option>
-        <option value="Medication">💊 Medication</option>
-        <option value="Other">📝 Other</option>
-      </select>
-
-      <label>Notes & Details</label>
-      <textarea id="entryDetails" placeholder="What did you eat, Bristol stool type, symptoms..."></textarea>
-
-      <!-- Indicator 1: Mood -->
-      <label>Mood <span class="score-badge" id="moodVal">3 / 5</span></label>
-      <input type="range" id="entryMood" min="1" max="5" value="3" oninput="moodVal.innerText = this.value + ' / 5'">
-      <div class="slider-labels">
-        <span>1: Low / Anxious</span>
-        <span>5: Great / Calm</span>
-      </div>
-
-      <!-- Indicator 2: Discomfort -->
-      <label>Discomfort / Bloating <span class="score-badge" id="discVal">1 / 5</span></label>
-      <input type="range" id="entryDiscomfort" min="1" max="5" value="1" oninput="discVal.innerText = this.value + ' / 5'">
-      <div class="slider-labels">
-        <span>1: None</span>
-        <span>5: Severe</span>
-      </div>
-
-      <!-- Indicator 3: Pain -->
-      <label>Pain Severity <span class="score-badge" id="painVal">1 / 5</span></label>
-      <input type="range" id="entryPain" min="1" max="5" value="1" oninput="painVal.innerText = this.value + ' / 5'">
-      <div class="slider-labels">
-        <span>1: None</span>
-        <span>5: Intense / Severe</span>
-      </div>
-
-      <button id="saveBtn" onclick="saveEntry()">Save Entry</button>
-      <button id="cancelEditBtn" class="btn-cancel" style="display:none;" onclick="cancelEditing()">Cancel Edit</button>
+    <!-- Nav tabs to jump between swipe slides directly -->
+    <div class="carousel-nav">
+      <button class="carousel-tab active" onclick="jumpToSlide(0)">Mood</button>
+      <button class="carousel-tab" onclick="jumpToSlide(1)">Discomfort</button>
+      <button class="carousel-tab" onclick="jumpToSlide(2)">Pain</button>
     </div>
 
-    <!-- Charts -->
-    <div class="card">
-      <h2>Trends Over Time</h2>
+    <!-- Swipeable container -->
+    <div class="swipe-container" id="swipeBox">
+      <!-- Slide 1: Mood -->
+      <div class="swipe-slide">
+        <div class="card">
+          <h2>Mood Trend (High = Happy)</h2>
+          <div class="chart-box">
+            <canvas id="moodChart"></canvas>
+          </div>
+        </div>
+      </div>
 
-      <h3 style="font-size: 14px; color: #28a745; margin-top: 15px;">😊 Mood Trend (High is Good)</h3>
-      <canvas id="moodChart" height="150"></canvas>
+      <!-- Slide 2: Discomfort -->
+      <div class="swipe-slide">
+        <div class="card">
+          <h2>Discomfort Trend (High = Light & Free)</h2>
+          <div class="chart-box">
+            <canvas id="discomfortChart"></canvas>
+          </div>
+        </div>
+      </div>
 
-      <h3 style="font-size: 14px; color: #fd7e14; margin-top: 25px;">🎈 Discomfort Trend (Low is Good)</h3>
-      <canvas id="discChart" height="150"></canvas>
-
-      <h3 style="font-size: 14px; color: #dc3545; margin-top: 25px;">⚡ Pain Severity Trend (Low is Good)</h3>
-      <canvas id="painChart" height="150"></canvas>
+      <!-- Slide 3: Pain -->
+      <div class="swipe-slide">
+        <div class="card">
+          <h2>Pain Severity (High = No Pain)</h2>
+          <div class="chart-box">
+            <canvas id="painChart"></canvas>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- History -->
-    <div class="card">
-      <h2>History & Records</h2>
-      <button class="btn-secondary" onclick="exportToCSV()">📥 Export to Excel (CSV)</button>
-      <div id="entriesList" style="margin-top: 14px;"></div>
-      <button class="btn-lock" onclick="lockApp()">🔒 Lock App</button>
-    </div>
+    
+    <p style="text-align:center; font-size: 12px; color: var(--secondary-text); margin-top: 8px;">
+      👈 Swipe horizontally to switch indicators 👉
+    </p>
   </div>
+
+  <!-- TAB 3: HISTORY & EXPORT / IMPORT -->
+  <div id="tab-history" class="tab-content">
+    <h1>History & Data</h1>
+
+    <div class="card">
+      <button class="btn btn-primary" id="exportBtn">📥 Export to CSV (Excel)</button>
+      <button class="btn btn-secondary" id="importBtn">📤 Import CSV Backup</button>
+      <input type="file" id="csvFileInput" accept=".csv">
+    </div>
+
+    <div id="entries-list"></div>
+  </div>
+
+  <!-- BOTTOM TAB BAR NAVIGATION -->
+  <nav class="tab-nav">
+    <button class="tab-button active" onclick="switchTab('tab-log', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Log
+    </button>
+    <button class="tab-button" onclick="switchTab('tab-trends', this)">
+      <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-4 4"/></svg>
+      Evolution
+    </button>
+    <button class="tab-button" onclick="switchTab('tab-history', this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      History
+    </button>
+  </nav>
 
   <script>
-    // --- PIN AUTHENTICATION ---
-    const savedPin = localStorage.getItem('app_pin');
-    const pinTitle = document.getElementById('pinTitle');
-    const pinSub = document.getElementById('pinSub');
-    const pinInput = document.getElementById('pinInput');
+    // --- STATE MANAGEMENT ---
+    let entries = JSON.parse(localStorage.getItem('belly_entries') || '[]');
+    let selectedMood = 0;
+    let selectedDiscomfort = 0;
+    let selectedPain = 0;
 
-    if (!savedPin) {
-      pinTitle.innerText = "Set a 4-Digit Passcode";
-      pinSub.innerText = "Create a PIN to secure your health diary";
-    }
+    let moodChartInst = null;
+    let discomfortChartInst = null;
+    let painChartInst = null;
 
-    function verifyPin() {
-      const pin = pinInput.value.trim();
-      if (pin.length !== 4 || isNaN(pin)) {
-        alert("Please enter a 4-digit number.");
-        return;
-      }
-      if (!savedPin) {
-        localStorage.setItem('app_pin', pin);
-        unlockApp();
-      } else if (pin === savedPin) {
-        unlockApp();
-      } else {
-        alert("Incorrect PIN");
-        pinInput.value = '';
-      }
-    }
-
-    pinInput.addEventListener('keyup', () => {
-      if (pinInput.value.length === 4) verifyPin();
+    // --- INIT APP ---
+    window.addEventListener('DOMContentLoaded', () => {
+      setDefaultDateTime();
+      bindRatingButtons();
+      renderHistory();
+      initSwipeSync();
     });
 
-    function unlockApp() {
-      document.getElementById('lockScreen').style.display = 'none';
-      document.getElementById('appContent').style.display = 'block';
-      initApp();
-    }
-
-    function lockApp() {
-      pinInput.value = '';
-      document.getElementById('lockScreen').style.display = 'flex';
-      document.getElementById('appContent').style.display = 'none';
-    }
-
-    // --- DATA HANDLING ---
-    function getEntries() {
-      return JSON.parse(localStorage.getItem('belly_entries') || '[]');
-    }
-
-    function saveEntries(arr) {
-      localStorage.setItem('belly_entries', JSON.stringify(arr));
-    }
-
-    function setNow() {
+    function setDefaultDateTime() {
       const now = new Date();
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      document.getElementById('entryDate').value = now.toISOString().slice(0, 16);
+      document.getElementById('date').value = now.toISOString().split('T')[0];
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('time').value = `${hours}:${minutes}`;
     }
 
-    function initApp() {
-      setNow();
-      renderList();
-      renderCharts();
-    }
+    // --- TAB SWITCHER ---
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      if (el) el.classList.add('active');
 
-    function saveEntry() {
-      const id = document.getElementById('editingId').value;
-      const date = document.getElementById('entryDate').value;
-      const type = document.getElementById('entryType').value;
-      const details = document.getElementById('entryDetails').value;
-      const mood = parseInt(document.getElementById('entryMood').value);
-      const discomfort = parseInt(document.getElementById('entryDiscomfort').value);
-      const pain = parseInt(document.getElementById('entryPain').value);
-
-      if (!details.trim()) {
-        alert("Please add notes or a description.");
-        return;
+      if (tabId === 'tab-trends') {
+        setTimeout(renderAllCharts, 100);
       }
+    }
 
-      let entries = getEntries();
+    // --- RATING BUTTONS ---
+    function bindRatingButtons() {
+      setupGroup('mood-selector', 'active-mood', (v) => selectedMood = v);
+      setupGroup('discomfort-selector', 'active-discomfort', (v) => selectedDiscomfort = v);
+      setupGroup('pain-selector', 'active-pain', (v) => selectedPain = v);
+    }
 
-      if (id) {
-        // Update existing entry
-        entries = entries.map(item => {
-          if (item.id === id) {
-            return { ...item, date, type, details, mood, discomfort, pain };
+    function setupGroup(containerId, activeClass, onSelect) {
+      const parent = document.getElementById(containerId);
+      const buttons = parent.querySelectorAll('.rating-btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = parseInt(btn.dataset.val);
+          if (btn.classList.contains(activeClass)) {
+            btn.classList.remove(activeClass);
+            onSelect(0);
+          } else {
+            buttons.forEach(b => b.classList.remove(activeClass));
+            btn.classList.add(activeClass);
+            onSelect(val);
           }
-          return item;
         });
-        cancelEditing();
-      } else {
-        // New entry
-        entries.push({
-          id: Date.now().toString(),
-          date,
-          type,
-          details,
-          mood,
-          discomfort,
-          pain
-        });
-        resetForm();
-      }
-
-      saveEntries(entries);
-      renderList();
-      renderCharts();
+      });
     }
 
-    function startEdit(id) {
-      const entries = getEntries();
+    function setRatingValue(containerId, activeClass, val) {
+      const parent = document.getElementById(containerId);
+      parent.querySelectorAll('.rating-btn').forEach(btn => {
+        btn.classList.toggle(activeClass, parseInt(btn.dataset.val) === val);
+      });
+    }
+
+    // --- FORM SUBMIT (CREATE OR EDIT) ---
+    document.getElementById('entry-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const editId = document.getElementById('entry-id').value;
+      const entryData = {
+        id: editId ? editId : 'id_' + Date.now(),
+        date: document.getElementById('date').value,
+        time: document.getElementById('time').value,
+        category: document.getElementById('category').value,
+        notes: document.getElementById('notes').value.trim(),
+        mood: selectedMood,
+        discomfort: selectedDiscomfort,
+        pain: selectedPain
+      };
+
+      if (editId) {
+        const idx = entries.findIndex(item => item.id === editId);
+        if (idx !== -1) entries[idx] = entryData;
+      } else {
+        entries.unshift(entryData);
+      }
+
+      saveData();
+      resetForm();
+      switchTab('tab-history', document.querySelectorAll('.tab-button')[2]);
+    });
+
+    document.getElementById('cancel-edit').addEventListener('click', resetForm);
+
+    function resetForm() {
+      document.getElementById('entry-form').reset();
+      document.getElementById('entry-id').value = '';
+      selectedMood = 0;
+      selectedDiscomfort = 0;
+      selectedPain = 0;
+      setRatingValue('mood-selector', 'active-mood', 0);
+      setRatingValue('discomfort-selector', 'active-discomfort', 0);
+      setRatingValue('pain-selector', 'active-pain', 0);
+      document.getElementById('form-title').innerText = 'Log Entry';
+      document.getElementById('save-button').innerText = 'Save Entry';
+      document.getElementById('cancel-edit').style.display = 'none';
+      setDefaultDateTime();
+    }
+
+    // --- EDIT & DELETE ---
+    function editEntry(id) {
       const item = entries.find(e => e.id === id);
       if (!item) return;
 
-      document.getElementById('editingId').value = item.id;
-      document.getElementById('entryDate').value = item.date;
-      document.getElementById('entryType').value = item.type;
-      document.getElementById('entryDetails').value = item.details;
-      
-      document.getElementById('entryMood').value = item.mood || 3;
-      document.getElementById('moodVal').innerText = (item.mood || 3) + ' / 5';
+      document.getElementById('entry-id').value = item.id;
+      document.getElementById('date').value = item.date;
+      document.getElementById('time').value = item.time;
+      document.getElementById('category').value = item.category;
+      document.getElementById('notes').value = item.notes || '';
 
-      document.getElementById('entryDiscomfort').value = item.discomfort || 1;
-      document.getElementById('discVal').innerText = (item.discomfort || 1) + ' / 5';
+      selectedMood = item.mood || 0;
+      selectedDiscomfort = item.discomfort || 0;
+      selectedPain = item.pain || 0;
 
-      document.getElementById('entryPain').value = item.pain || 1;
-      document.getElementById('painVal').innerText = (item.pain || 1) + ' / 5';
+      setRatingValue('mood-selector', 'active-mood', selectedMood);
+      setRatingValue('discomfort-selector', 'active-discomfort', selectedDiscomfort);
+      setRatingValue('pain-selector', 'active-pain', selectedPain);
 
-      document.getElementById('editingBanner').style.display = 'block';
-      document.getElementById('formTitle').innerText = 'Edit Entry';
-      document.getElementById('saveBtn').innerText = 'Update Entry';
-      document.getElementById('cancelEditBtn').style.display = 'block';
+      document.getElementById('form-title').innerText = 'Edit Entry';
+      document.getElementById('save-button').innerText = 'Update Entry';
+      document.getElementById('cancel-edit').style.display = 'block';
 
-      // Scroll to top to make editing obvious
+      switchTab('tab-log', document.querySelectorAll('.tab-button')[0]);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function cancelEditing() {
-      document.getElementById('editingId').value = '';
-      document.getElementById('editingBanner').style.display = 'none';
-      document.getElementById('formTitle').innerText = 'Add Entry';
-      document.getElementById('saveBtn').innerText = 'Save Entry';
-      document.getElementById('cancelEditBtn').style.display = 'none';
-      resetForm();
+    function deleteEntry(id) {
+      if (confirm('Are you sure you want to delete this entry?')) {
+        entries = entries.filter(e => e.id !== id);
+        saveData();
+      }
     }
 
-    function resetForm() {
-      setNow();
-      document.getElementById('entryDetails').value = '';
-      document.getElementById('entryMood').value = 3;
-      document.getElementById('moodVal').innerText = '3 / 5';
-      document.getElementById('entryDiscomfort').value = 1;
-      document.getElementById('discVal').innerText = '1 / 5';
-      document.getElementById('entryPain').value = 1;
-      document.getElementById('painVal').innerText = '1 / 5';
+    function saveData() {
+      localStorage.setItem('belly_entries', JSON.stringify(entries));
+      renderHistory();
     }
 
-    function renderList() {
-      const entries = getEntries().slice().reverse();
-      const listEl = document.getElementById('entriesList');
+    // --- RENDER HISTORY ---
+    function renderHistory() {
+      const container = document.getElementById('entries-list');
       if (entries.length === 0) {
-        listEl.innerHTML = '<p style="color:#888; text-align:center;">No entries yet.</p>';
+        container.innerHTML = '<p style="text-align:center; color: var(--secondary-text); margin-top:20px;">No entries logged yet.</p>';
         return;
       }
 
-      listEl.innerHTML = entries.map(item => `
-        <div class="entry-item">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-            <div>
-              <span class="badge">${item.type}</span>
-              <span style="color:#666; font-size:12px; margin-left:6px;">${item.date.replace('T', ' ')}</span>
-            </div>
-            <button class="edit-btn" onclick="startEdit('${item.id}')">Edit</button>
+      container.innerHTML = entries.map(item => `
+        <div class="history-card">
+          <div class="history-header">
+            <span class="badge ${item.category}">${item.category}</span>
+            <span style="font-size:12px; color:var(--secondary-text);">${item.date} at ${item.time}</span>
           </div>
-          <div style="margin-top: 4px;">${item.details}</div>
-          <div class="metrics-summary">
-            <span>Mood: <b>${item.mood || '-'}</b>/5</span>
-            <span>Discomfort: <b>${item.discomfort || '-'}</b>/5</span>
-            <span>Pain: <b>${item.pain || '-'}</b>/5</span>
+          ${item.notes ? `<p style="font-size:14px; margin: 6px 0;">${escapeHtml(item.notes)}</p>` : ''}
+          <div class="scores-row">
+            ${item.mood ? `<span class="score-chip chip-mood">Mood: ${item.mood}/5</span>` : ''}
+            ${item.discomfort ? `<span class="score-chip chip-discomfort">Comfort: ${item.discomfort}/5</span>` : ''}
+            ${item.pain ? `<span class="score-chip chip-pain">Pain Comfort: ${item.pain}/5</span>` : ''}
+          </div>
+          <div class="history-actions">
+            <button class="action-btn" onclick="editEntry('${item.id}')">✏️ Edit</button>
+            <button class="action-btn" style="color:var(--danger);" onclick="deleteEntry('${item.id}')">🗑️ Delete</button>
           </div>
         </div>
       `).join('');
     }
 
-    // --- CHARTS ---
-    let moodChartInstance = null;
-    let discChartInstance = null;
-    let painChartInstance = null;
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, m => ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": ''' }[m]));
+    }
 
-    function renderCharts() {
-      const entries = getEntries();
-      const labels = entries.map(e => e.date.slice(5).replace('T', ' '));
+    // --- SWIPE CAROUSEL LOGIC ---
+    function jumpToSlide(index) {
+      const container = document.getElementById('swipeBox');
+      const slideWidth = container.clientWidth;
+      container.scrollTo({ left: slideWidth * index, behavior: 'smooth' });
+      updateSlideTabs(index);
+    }
 
-      const moods = entries.map(e => e.mood || null);
-      const discomforts = entries.map(e => e.discomfort || null);
-      const pains = entries.map(e => e.pain || null);
-
-      const commonOptions = {
-        responsive: true,
-        scales: {
-          y: {
-            min: 1,
-            max: 5,
-            ticks: { stepSize: 1 }
-          }
-        }
-      };
-
-      // 1. Mood Chart (Green)
-      const ctxMood = document.getElementById('moodChart').getContext('2d');
-      if (moodChartInstance) moodChartInstance.destroy();
-      moodChartInstance = new Chart(ctxMood, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Mood (1=Low, 5=Great)',
-            data: moods,
-            borderColor: '#28a745',
-            backgroundColor: 'rgba(40, 167, 69, 0.1)',
-            fill: true,
-            tension: 0.25
-          }]
-        },
-        options: commonOptions
-      });
-
-      // 2. Discomfort Chart (Orange)
-      const ctxDisc = document.getElementById('discChart').getContext('2d');
-      if (discChartInstance) discChartInstance.destroy();
-      discChartInstance = new Chart(ctxDisc, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Discomfort (1=None, 5=Severe)',
-            data: discomforts,
-            borderColor: '#fd7e14',
-            backgroundColor: 'rgba(253, 126, 20, 0.1)',
-            fill: true,
-            tension: 0.25
-          }]
-        },
-        options: commonOptions
-      });
-
-      // 3. Pain Chart (Red)
-      const ctxPain = document.getElementById('painChart').getContext('2d');
-      if (painChartInstance) painChartInstance.destroy();
-      painChartInstance = new Chart(ctxPain, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Pain Severity (1=None, 5=Severe)',
-            data: pains,
-            borderColor: '#dc3545',
-            backgroundColor: 'rgba(220, 53, 69, 0.1)',
-            fill: true,
-            tension: 0.25
-          }]
-        },
-        options: commonOptions
+    function initSwipeSync() {
+      const container = document.getElementById('swipeBox');
+      container.addEventListener('scroll', () => {
+        const index = Math.round(container.scrollLeft / container.clientWidth);
+        updateSlideTabs(index);
       });
     }
 
-    // --- CSV EXPORT ---
-    function exportToCSV() {
-      const entries = getEntries();
-      if (!entries.length) {
-        alert("No data to export!");
+    function updateSlideTabs(index) {
+      const tabs = document.querySelectorAll('.carousel-tab');
+      tabs.forEach((tab, i) => tab.classList.toggle('active', i === index));
+    }
+
+    // --- CHARTS (1 = BAD, 5 = EXCELLENT) ---
+    function renderAllCharts() {
+      // Sort oldest to newest for chronological evolution
+      const chronological = [...entries].sort((a, b) => (a.date + ' ' + a.time).localeCompare(b.date + ' ' + b.time));
+      
+      const labels = chronological.map(e => `${e.date.slice(5)} ${e.time}`);
+      const moodData = chronological.map(e => e.mood || null);
+      const discomfortData = chronological.map(e => e.discomfort || null);
+      const painData = chronological.map(e => e.pain || null);
+
+      moodChartInst = buildChart('moodChart', moodChartInst, labels, moodData, 'Mood', '#007AFF');
+      discomfortChartInst = buildChart('discomfortChart', discomfortChartInst, labels, discomfortData, 'Belly Comfort', '#FF9500');
+      painChartInst = buildChart('painChart', painChartInst, labels, painData, 'Pain Comfort (High=None)', '#34C759');
+    }
+
+    function buildChart(canvasId, chartInst, labels, data, label, color) {
+      if (chartInst) chartInst.destroy();
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: label,
+            data: data,
+            borderColor: color,
+            backgroundColor: color + '22',
+            tension: 0.25,
+            fill: true,
+            spanGaps: true,
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              min: 1,
+              max: 5,
+              ticks: {
+                stepSize: 1,
+                callback: (val) => {
+                  if (val === 1) return '1 (Worst)';
+                  if (val === 5) return '5 (Best)';
+                  return val;
+                }
+              }
+            },
+            x: {
+              ticks: { maxRotation: 45, minRotation: 45, font: { size: 10 } }
+            }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    // --- EXPORT TO CSV ---
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      if (entries.length === 0) {
+        alert('No entries to export.');
         return;
       }
-      let csv = "Date,Type,Details,Mood (1-5),Discomfort (1-5),Pain (1-5)\n";
+
+      let csv = 'ID,Date,Time,Category,Notes,Mood,Discomfort,PainComfort\r\n';
       entries.forEach(e => {
-        csv += `"${e.date}","${e.type}","${(e.details || '').replace(/"/g, '""')}","${e.mood || ''}","${e.discomfort || ''}","${e.pain || ''}"\n`;
+        const cleanNotes = `"${(e.notes || '').replace(/"/g, '""')}"`;
+        csv += `${e.id},${e.date},${e.time},${e.category},${cleanNotes},${e.mood || 0},${e.discomfort || 0},${e.pain || 0}\r\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", "belly_tracker_data.csv");
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `belly_tracker_${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }
+    });
+
+    // --- IMPORT CSV ---
+    document.getElementById('importBtn').addEventListener('click', () => {
+      document.getElementById('csvFileInput').click();
+    });
+
+    document.getElementById('csvFileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const text = evt.target.result;
+          const lines = text.split(/\r\n|\n/);
+          if (lines.length < 2) throw new Error('File is empty.');
+
+          const imported = [];
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            // Simple CSV line parser
+            const parts = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+            if (parts.length >= 4) {
+              imported.push({
+                id: parts[0] ? parts[0].replace(/"/g, '') : 'id_' + Date.now() + i,
+                date: parts[1] ? parts[1].replace(/"/g, '') : '',
+                time: parts[2] ? parts[2].replace(/"/g, '') : '',
+                category: parts[3] ? parts[3].replace(/"/g, '') : 'Note',
+                notes: parts[4] ? parts[4].replace(/^"|"$/g, '').replace(/""/g, '"') : '',
+                mood: parts[5] ? parseInt(parts[5].replace(/"/g, '')) || 0 : 0,
+                discomfort: parts[6] ? parseInt(parts[6].replace(/"/g, '')) || 0 : 0,
+                pain: parts[7] ? parseInt(parts[7].replace(/"/g, '')) || 0 : 0
+              });
+            }
+          }
+
+          if (imported.length > 0) {
+            entries = imported;
+            saveData();
+            alert(`Successfully restored ${imported.length} entries!`);
+          } else {
+            alert('Could not parse any records from this file.');
+          }
+        } catch (err) {
+          alert('Error reading CSV file: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    });
   </script>
 </body>
 </html>
