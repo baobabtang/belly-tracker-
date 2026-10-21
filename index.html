@@ -2,747 +2,410 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#F2F2F7">
   <title>Belly Tracker</title>
 
-  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/baobabtang/belly-tracker-/main/icon.png">
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/baobabtang/belly-tracker-/main/icon.png">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    :root {
-      --bg: #F2F2F7;
-      --card: #FFFFFF;
-      --blue: #007AFF;
-      --text: #111111;
-      --muted: #77777D;
-      --border: #E2E2E7;
-      --red: #FF3B30;
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: calc(env(safe-area-inset-top, 16px) + 12px) 16px
-        calc(env(safe-area-inset-bottom, 16px) + 28px);
-      overflow-x: hidden;
-      background: var(--bg);
-      color: var(--text);
+      max-width: 480px; margin: auto; padding: 20px 16px 40px;
+      background: #F2F2F7; color: #111;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.4;
     }
-
-    h1 {
-      margin: 0 0 14px;
-      font-size: 27px;
-      letter-spacing: -0.5px;
+    h1 { font-size: 26px; margin: 0 0 14px; }
+    h2 { font-size: 19px; margin: 22px 0 12px; }
+    .card, .entry {
+      background: white; border-radius: 14px; padding: 16px;
+      margin-bottom: 12px; box-shadow: 0 1px 3px #0001;
     }
-
-    h2 {
-      margin: 22px 0 12px;
-      font-size: 19px;
-    }
-
-    .card, .history-card {
-      width: 100%;
-      padding: 16px;
-      margin-bottom: 14px;
-      border-radius: 14px;
-      background: var(--card);
-      box-shadow: 0 1px 3px #0000000d;
-    }
-
-    .form-group { margin-bottom: 15px; }
-
+    .group { margin-bottom: 14px; }
     label {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 6px;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 650;
+      display: flex; justify-content: space-between; gap: 8px;
+      margin-bottom: 6px; color: #666; font-size: 13px; font-weight: 600;
     }
-
-    input, select, textarea, button { font: inherit; }
-
     input:not([type="range"]), select, textarea {
-      width: 100%;
-      min-width: 0;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: #FAFAFC;
-      color: var(--text);
-      font-size: 16px;
+      width: 100%; min-width: 0; padding: 12px; border: 1px solid #ddd;
+      border-radius: 10px; background: #fafafa; font: inherit; font-size: 16px;
     }
-
-    .datetime-row {
-      display: flex;
-      gap: 10px;
-    }
-
-    .datetime-row input { flex: 1; }
-
-    textarea {
-      min-height: 76px;
-      resize: vertical;
-    }
-
-    .slider-container { padding: 3px 0; }
-
-    input[type="range"] {
-      width: 100%;
-      height: 8px;
-      margin: 12px 0 8px;
-      padding: 0;
-      border: 0;
-      border-radius: 5px;
-      background: #E5E5EA;
-      accent-color: var(--blue);
-    }
-
-    .badge-val {
-      padding: 2px 8px;
-      border-radius: 6px;
-      background: #E5E5EA;
-      color: var(--text);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .slider-labels {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .btn {
-      display: flex;
-      width: 100%;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      padding: 14px;
-      border: 0;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 650;
+    .date-row { display: flex; gap: 8px; }
+    .date-row input { flex: 1; }
+    textarea { min-height: 70px; resize: vertical; }
+    input[type="range"] { width: 100%; accent-color: #007aff; }
+    .row-labels { display: flex; justify-content: space-between; color: #777; font-size: 11px; }
+    .score { color: #111; }
+    button {
+      width: 100%; padding: 14px; border: 0; border-radius: 11px;
+      background: #007aff; color: white; font: inherit; font-weight: 650;
       cursor: pointer;
     }
-
-    .btn-primary {
-      background: var(--blue);
-      color: #FFFFFF;
+    button.secondary { margin-top: 9px; background: #e5e5ea; color: #111; }
+    .carousel {
+      display: flex; gap: 12px; overflow-x: auto;
+      scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
     }
-
-    .btn-secondary {
-      margin-top: 10px;
-      background: #E5E5EA;
-      color: var(--text);
-    }
-
-    .swipe-container {
-      display: flex;
-      width: 100%;
-      gap: 12px;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-
-    .swipe-container::-webkit-scrollbar { display: none; }
-
-    .swipe-slide {
-      flex: 0 0 100%;
-      width: 100%;
-      scroll-snap-align: start;
-    }
-
-    .chart-box {
-      position: relative;
-      width: 100%;
-      height: 240px;
-    }
-
-    .carousel-dots {
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #D1D1D6;
-    }
-
-    .dot.active {
-      width: 18px;
-      border-radius: 4px;
-      background: var(--blue);
-    }
-
-    .history-card { padding: 14px; }
-
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-
-    .cat-badge {
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: #E5E5EA;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .cat-badge.Food { background: #E1F5FE; color: #0288D1; }
-    .cat-badge.Stool { background: #EFEBE9; color: #5D4037; }
-    .cat-badge.Medication { background: #EDE7F6; color: #512DA8; }
-    .cat-badge.Symptom { background: #FFEBEE; color: #C62828; }
-
-    .entry-date {
-      color: var(--muted);
-      font-size: 12px;
-      text-align: right;
-    }
-
-    .score-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-      font-size: 12px;
-    }
-
-    .chip {
-      padding: 3px 7px;
-      border-radius: 6px;
-      font-weight: 600;
-    }
-
-    .chip-mood { background: #E3F2FD; color: #1565C0; }
-    .chip-discomfort { background: #FFF3E0; color: #E65100; }
-    .chip-pain { background: #FFEBEE; color: #C62828; }
-
-    .actions-row {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .action-btn {
-      padding: 6px 10px;
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      background: #FFFFFF;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    #csvFileInput { display: none; }
-
-    .empty-message, .chart-message {
-      margin: 16px 0;
-      color: var(--muted);
-      font-size: 14px;
-      text-align: center;
-    }
+    .slide { flex: 0 0 100%; scroll-snap-align: start; }
+    .chart-box { height: 230px; }
+    .dots { display: flex; justify-content: center; gap: 7px; margin: 8px; }
+    .dot { width: 8px; height: 8px; border-radius: 9px; background: #bbb; }
+    .dot.active { width: 18px; background: #007aff; }
+    .entry-head { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #666; }
+    .entry p { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .scores { margin-top: 8px; font-size: 13px; }
+    .entry-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+    .entry-actions button { width: auto; padding: 7px 10px; background: #eee; color: #111; font-size: 13px; }
+    .empty { text-align: center; color: #777; padding: 14px; }
+    #csvFile { display: none; }
   </style>
 </head>
 
 <body>
-  <h1 id="form-title">Log Entry</h1>
+  <h1 id="formTitle">Log Entry</h1>
 
-  <div class="card">
-    <form id="entry-form">
-      <input type="hidden" id="entry-id">
+  <section class="card">
+    <form id="entryForm">
+      <input id="entryId" type="hidden">
 
-      <div class="form-group">
-        <label for="date">Date & Time</label>
-        <div class="datetime-row">
-          <input type="date" id="date" required>
-          <input type="time" id="time" required>
+      <div class="group">
+        <label>Date & time</label>
+        <div class="date-row">
+          <input id="date" type="date" required>
+          <input id="time" type="time" required>
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="group">
         <label for="category">Category</label>
-        <select id="category" required>
-          <option value="Food">🍽️ Food / Drink</option>
-          <option value="Stool">💩 Stool</option>
-          <option value="Symptom">⚠️ Pain / Symptom</option>
-          <option value="Medication">💊 Medication</option>
-          <option value="Note">📝 General Note</option>
+        <select id="category">
+          <option>Food</option>
+          <option>Stool</option>
+          <option>Symptom</option>
+          <option>Medication</option>
+          <option>Note</option>
         </select>
       </div>
 
-      <div class="form-group">
+      <div class="group">
         <label for="notes">Notes</label>
-        <textarea id="notes" placeholder="What did you eat, stool details, symptoms..."></textarea>
+        <textarea id="notes" placeholder="What did you eat, or what did you notice?"></textarea>
       </div>
 
-      <div class="form-group slider-container">
-        <label for="mood">
-          <span>Mood</span><span class="badge-val" id="val-mood">5 / 10</span>
-        </label>
-        <input type="range" id="mood" min="1" max="10" value="5">
-        <div class="slider-labels"><span>1 (Low)</span><span>10 (Great)</span></div>
+      <div class="group">
+        <label for="mood">Mood <span class="score" id="moodValue"></span></label>
+        <input id="mood" type="range" min="0" max="10" value="5">
+        <div class="row-labels"><span>0 (Low)</span><span>10 (Great)</span></div>
       </div>
 
-      <div class="form-group slider-container">
-        <label for="discomfort">
-          <span>Belly discomfort</span><span class="badge-val" id="val-discomfort">1 / 10</span>
-        </label>
-        <input type="range" id="discomfort" min="1" max="10" value="1">
-        <div class="slider-labels"><span>1 (None)</span><span>10 (Severe)</span></div>
+      <div class="group">
+        <label for="discomfort">Belly discomfort <span class="score" id="discomfortValue"></span></label>
+        <input id="discomfort" type="range" min="0" max="10" value="0">
+        <div class="row-labels"><span>0 (None)</span><span>10 (Severe)</span></div>
       </div>
 
-      <div class="form-group slider-container">
-        <label for="pain">
-          <span>Pain</span><span class="badge-val" id="val-pain">1 / 10</span>
-        </label>
-        <input type="range" id="pain" min="1" max="10" value="1">
-        <div class="slider-labels"><span>1 (None)</span><span>10 (Severe)</span></div>
+      <div class="group">
+        <label for="pain">Pain <span class="score" id="painValue"></span></label>
+        <input id="pain" type="range" min="0" max="10" value="0">
+        <div class="row-labels"><span>0 (None)</span><span>10 (Severe)</span></div>
       </div>
 
-      <button type="submit" class="btn btn-primary" id="save-button">Save Entry</button>
-      <button type="button" class="btn btn-secondary" id="cancel-edit" hidden>Cancel Edit</button>
+      <button id="saveButton" type="submit">Save Entry</button>
+      <button id="cancelButton" class="secondary" type="button" hidden>Cancel Edit</button>
     </form>
-  </div>
+  </section>
 
   <h2>Evolution Trends</h2>
-  <div class="swipe-container" id="swipeBox">
-    <div class="swipe-slide">
-      <div class="card">
-        <h2 style="margin-top:0;font-size:16px">Mood (higher is better)</h2>
-        <div class="chart-box"><canvas id="moodChart"></canvas></div>
-      </div>
-    </div>
-    <div class="swipe-slide">
-      <div class="card">
-        <h2 style="margin-top:0;font-size:16px">Belly discomfort (higher is worse)</h2>
-        <div class="chart-box"><canvas id="discomfortChart"></canvas></div>
-      </div>
-    </div>
-    <div class="swipe-slide">
-      <div class="card">
-        <h2 style="margin-top:0;font-size:16px">Pain (higher is worse)</h2>
-        <div class="chart-box"><canvas id="painChart"></canvas></div>
-      </div>
-    </div>
+  <div class="carousel" id="carousel">
+    <div class="slide"><section class="card"><strong>Mood</strong><div class="chart-box"><canvas id="moodChart"></canvas></div></section></div>
+    <div class="slide"><section class="card"><strong>Belly discomfort</strong><div class="chart-box"><canvas id="discomfortChart"></canvas></div></section></div>
+    <div class="slide"><section class="card"><strong>Pain</strong><div class="chart-box"><canvas id="painChart"></canvas></div></section></div>
   </div>
-
-  <div class="carousel-dots" aria-hidden="true">
-    <span class="dot active"></span>
-    <span class="dot"></span>
-    <span class="dot"></span>
-  </div>
-  <p class="empty-message">Swipe left or right to view each graph.</p>
+  <div class="dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+  <p class="empty">Swipe sideways to see all three graphs.</p>
 
   <h2>Backup & Data</h2>
-  <div class="card">
-    <button type="button" class="btn btn-primary" id="exportBtn">📥 Export to CSV</button>
-    <button type="button" class="btn btn-secondary" id="importBtn">📤 Import CSV</button>
-    <input type="file" id="csvFileInput" accept=".csv,text/csv">
-  </div>
+  <section class="card">
+    <button id="exportButton" type="button">Export CSV</button>
+    <button id="importButton" class="secondary" type="button">Import CSV</button>
+    <input id="csvFile" type="file" accept=".csv,text/csv">
+  </section>
 
   <h2>Recent Entries</h2>
-  <div id="entries-list"></div>
+  <div id="entriesList"></div>
 
   <script>
-    'use strict';
+    (() => {
+      const KEY = 'belly_entries';
+      const $ = id => document.getElementById(id);
+      let entries = readEntries();
+      const charts = {};
 
-    const STORAGE_KEY = 'belly_entries';
-    const $ = id => document.getElementById(id);
-    let entries = loadEntries();
-    const charts = {};
-
-    function localDateString(date = new Date()) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    function makeId() {
-      return `id_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    }
-
-    function validScore(value, fallback) {
-      const number = Number(value);
-      return Number.isFinite(number) && number >= 1 && number <= 10
-        ? Math.round(number)
-        : fallback;
-    }
-
-    function loadEntries() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        if (!Array.isArray(saved)) return [];
-        return saved.map(item => ({
-          id: String(item.id || makeId()),
-          date: String(item.date || localDateString()),
-          time: String(item.time || '12:00'),
-          category: ['Food', 'Stool', 'Symptom', 'Medication', 'Note'].includes(item.category)
-            ? item.category : 'Note',
-          notes: String(item.notes || ''),
-          mood: validScore(item.mood, 5),
-          discomfort: validScore(item.discomfort, 1),
-          pain: validScore(item.pain, 1)
-        }));
-      } catch (error) {
-        console.error('Could not load saved entries:', error);
-        return [];
+      function localDate(date = new Date()) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       }
-    }
 
-    function saveData() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-        renderHistory();
-        renderCharts();
-      } catch (error) {
-        console.error('Could not save entries:', error);
-        alert('Could not save this entry. Check that browser storage is available.');
+      function makeId() {
+        return 'entry_' + Date.now() + '_' + Math.random().toString(36).slice(2);
       }
-    }
 
-    function setDefaultDateTime() {
-      const now = new Date();
-      $('date').value = localDateString(now);
-      $('time').value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    }
+      function readEntries() {
+        try {
+          const value = JSON.parse(localStorage.getItem(KEY) || '[]');
+          return Array.isArray(value) ? value : [];
+        } catch (error) {
+          console.error('Could not read saved entries:', error);
+          return [];
+        }
+      }
 
-    function updateScoreLabels() {
-      ['mood', 'discomfort', 'pain'].forEach(id => {
-        $(`val-${id}`).textContent = `${$(id).value} / 10`;
+      function saveEntries() {
+        try {
+          localStorage.setItem(KEY, JSON.stringify(entries));
+          renderEntries();
+          renderCharts();
+          return true;
+        } catch (error) {
+          console.error('Could not save entries:', error);
+          alert('The browser could not save this entry. Try opening the app in Safari.');
+          return false;
+        }
+      }
+
+      function setDateTime() {
+        const now = new Date();
+        $('date').value = localDate(now);
+        $('time').value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      }
+
+      function updateScoreLabels() {
+        ['mood', 'discomfort', 'pain'].forEach(id => {
+          $(id + 'Value').textContent = `${$(id).value} / 10`;
+        });
+      }
+
+      ['mood', 'discomfort', 'pain'].forEach(id =>
+        $(id).addEventListener('input', updateScoreLabels)
+      );
+
+      function escapeHtml(text) {
+        return String(text ?? '').replace(/[&<>"']/g, char => ({
+          '&': '&', '<': '<', '>': '>', '"': '"', "'": '''
+        })[char]);
+      }
+
+      function renderEntries() {
+        const list = $('entriesList');
+        if (!entries.length) {
+          list.innerHTML = '<div class="empty">No entries yet. Save an entry using the form above.</div>';
+          return;
+        }
+
+        const sorted = [...entries].sort((a, b) =>
+          `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`)
+        );
+
+        list.innerHTML = sorted.map(item => `
+          <article class="entry">
+            <div class="entry-head">
+              <strong>${escapeHtml(item.category)}</strong>
+              <span>${escapeHtml(item.date)} ${escapeHtml(item.time)}</span>
+            </div>
+            ${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}
+            <div class="scores">
+              Mood: ${item.mood}/10 · Discomfort: ${item.discomfort}/10 · Pain: ${item.pain}/10
+            </div>
+            <div class="entry-actions">
+              <button type="button" data-action="edit" data-id="${escapeHtml(item.id)}">Edit</button>
+              <button type="button" data-action="delete" data-id="${escapeHtml(item.id)}">Delete</button>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      $('entriesList').addEventListener('click', event => {
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
+
+        const item = entries.find(entry => String(entry.id) === button.dataset.id);
+        if (!item) return;
+
+        if (button.dataset.action === 'delete') {
+          if (confirm('Delete this entry?')) {
+            entries = entries.filter(entry => String(entry.id) !== button.dataset.id);
+            saveEntries();
+          }
+        } else {
+          $('entryId').value = item.id;
+          $('date').value = item.date;
+          $('time').value = item.time;
+          $('category').value = item.category;
+          $('notes').value = item.notes || '';
+          $('mood').value = item.mood;
+          $('discomfort').value = item.discomfort;
+          $('pain').value = item.pain;
+          $('formTitle').textContent = 'Edit Entry';
+          $('saveButton').textContent = 'Update Entry';
+          $('cancelButton').hidden = false;
+          updateScoreLabels();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       });
-    }
 
-    ['mood', 'discomfort', 'pain'].forEach(id => {
-      $(id).addEventListener('input', updateScoreLabels);
-    });
+      function resetForm() {
+        $('entryForm').reset();
+        $('entryId').value = '';
+        $('mood').value = 5;
+        $('discomfort').value = 0;
+        $('pain').value = 0;
+        $('formTitle').textContent = 'Log Entry';
+        $('saveButton').textContent = 'Save Entry';
+        $('cancelButton').hidden = true;
+        setDateTime();
+        updateScoreLabels();
+      }
 
-    function resetForm() {
-      $('entry-form').reset();
-      $('entry-id').value = '';
-      $('mood').value = '5';
-      $('discomfort').value = '1';
-      $('pain').value = '1';
-      $('form-title').textContent = 'Log Entry';
-      $('save-button').textContent = 'Save Entry';
-      $('cancel-edit').hidden = true;
-      setDefaultDateTime();
-      updateScoreLabels();
-    }
+      $('cancelButton').addEventListener('click', resetForm);
 
-    $('cancel-edit').addEventListener('click', resetForm);
+      $('entryForm').addEventListener('submit', event => {
+        event.preventDefault();
 
-    $('entry-form').addEventListener('submit', event => {
-      event.preventDefault();
+        const id = $('entryId').value || makeId();
+        const entry = {
+          id,
+          date: $('date').value,
+          time: $('time').value,
+          category: $('category').value,
+          notes: $('notes').value.trim(),
+          mood: Number($('mood').value),
+          discomfort: Number($('discomfort').value),
+          pain: Number($('pain').value)
+        };
 
-      const editId = $('entry-id').value;
-      const entry = {
-        id: editId || makeId(),
-        date: $('date').value,
-        time: $('time').value,
-        category: $('category').value,
-        notes: $('notes').value.trim(),
-        mood: Number($('mood').value),
-        discomfort: Number($('discomfort').value),
-        pain: Number($('pain').value)
-      };
-
-      if (editId) {
-        const index = entries.findIndex(item => item.id === editId);
-        if (index !== -1) entries[index] = entry;
+        const index = entries.findIndex(item => String(item.id) === String(id));
+        if (index >= 0) entries[index] = entry;
         else entries.unshift(entry);
-      } else {
-        entries.unshift(entry);
-      }
 
-      saveData();
-      resetForm();
-    });
+        if (saveEntries()) resetForm();
+      });
 
-    function editEntry(id) {
-      const item = entries.find(entry => entry.id === id);
-      if (!item) return;
+      function renderCharts() {
+        if (typeof Chart === 'undefined') {
+          document.querySelectorAll('.chart-box').forEach(box => {
+            box.innerHTML = '<p class="empty">Graphs could not load. Check your internet connection and reload.</p>';
+          });
+          return;
+        }
 
-      $('entry-id').value = item.id;
-      $('date').value = item.date;
-      $('time').value = item.time;
-      $('category').value = item.category;
-      $('notes').value = item.notes;
-      $('mood').value = String(item.mood);
-      $('discomfort').value = String(item.discomfort);
-      $('pain').value = String(item.pain);
-      $('form-title').textContent = 'Edit Entry';
-      $('save-button').textContent = 'Update Entry';
-      $('cancel-edit').hidden = false;
-      updateScoreLabels();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+        const sorted = [...entries].sort((a, b) =>
+          `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)
+        );
+        const labels = sorted.map(item => `${item.date} ${item.time}`);
 
-    function deleteEntry(id) {
-      if (!confirm('Delete this entry?')) return;
-      entries = entries.filter(entry => entry.id !== id);
-      saveData();
-    }
-
-    function escapeHtml(value) {
-      return String(value).replace(/[&<>"']/g, character => ({
-        '&': '&',
-        '<': '<',
-        '>': '>',
-        '"': '"',
-        "'": '''
-      })[character]);
-    }
-
-    function renderHistory() {
-      const container = $('entries-list');
-
-      if (!entries.length) {
-        container.innerHTML = '<p class="empty-message">No entries logged yet.</p>';
-        return;
-      }
-
-      const sorted = [...entries].sort((a, b) =>
-        `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`)
-      );
-
-      container.innerHTML = sorted.map(item => `
-        <article class="history-card">
-          <div class="history-header">
-            <span class="cat-badge ${escapeHtml(item.category)}">${escapeHtml(item.category)}</span>
-            <span class="entry-date">${escapeHtml(item.date)} ${escapeHtml(item.time)}</span>
-          </div>
-          ${item.notes ? `<p style="font-size:14px;margin:6px 0">${escapeHtml(item.notes)}</p>` : ''}
-          <div class="score-row">
-            <span class="chip chip-mood">Mood: ${item.mood}/10</span>
-            <span class="chip chip-discomfort">Discomfort: ${item.discomfort}/10</span>
-            <span class="chip chip-pain">Pain: ${item.pain}/10</span>
-          </div>
-          <div class="actions-row">
-            <button type="button" class="action-btn" data-action="edit" data-id="${escapeHtml(item.id)}">✏️ Edit</button>
-            <button type="button" class="action-btn" data-action="delete" data-id="${escapeHtml(item.id)}">🗑️ Delete</button>
-          </div>
-        </article>
-      `).join('');
-    }
-
-    $('entries-list').addEventListener('click', event => {
-      const button = event.target.closest('button[data-action]');
-      if (!button) return;
-      if (button.dataset.action === 'edit') editEntry(button.dataset.id);
-      if (button.dataset.action === 'delete') deleteEntry(button.dataset.id);
-    });
-
-    function renderCharts() {
-      if (typeof Chart === 'undefined') {
-        document.querySelectorAll('.chart-box').forEach(box => {
-          box.innerHTML = '<p class="chart-message">Graphs need an internet connection to load.</p>';
-        });
-        return;
-      }
-
-      const chronological = [...entries].sort((a, b) =>
-        `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)
-      );
-      const labels = chronological.map(entry => `${entry.date.slice(5)} ${entry.time}`);
-
-      const definitions = [
-        ['moodChart', 'Mood', 'mood', '#007AFF'],
-        ['discomfortChart', 'Belly discomfort', 'discomfort', '#FF9500'],
-        ['painChart', 'Pain', 'pain', '#FF3B30']
-      ];
-
-      definitions.forEach(([canvasId, title, key, color]) => {
-        if (charts[canvasId]) charts[canvasId].destroy();
-
-        charts[canvasId] = new Chart($(canvasId), {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [{
-              label: title,
-              data: chronological.map(entry => entry[key]),
-              borderColor: color,
-              backgroundColor: `${color}22`,
-              tension: 0.2,
-              fill: true,
-              pointRadius: 4
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: { min: 1, max: 10, ticks: { stepSize: 1 } },
-              x: { ticks: { maxRotation: 45, minRotation: 45, font: { size: 10 } } }
+        [
+          ['moodChart', 'mood', '#007AFF'],
+          ['discomfortChart', 'discomfort', '#FF9500'],
+          ['painChart', 'pain', '#FF3B30']
+        ].forEach(([canvasId, field, color]) => {
+          if (charts[canvasId]) charts[canvasId].destroy();
+          charts[canvasId] = new Chart($(canvasId), {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                data: sorted.map(item => Number(item[field])),
+                borderColor: color,
+                backgroundColor: color + '22',
+                pointRadius: 4,
+                tension: 0.2,
+                fill: true
+              }]
             },
-            plugins: { legend: { display: false } }
-          }
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: { y: { min: 0, max: 10, ticks: { stepSize: 1 } } },
+              plugins: { legend: { display: false } }
+            }
+          });
         });
+      }
+
+      $('carousel').addEventListener('scroll', () => {
+        const index = Math.round($('carousel').scrollLeft / $('carousel').clientWidth);
+        document.querySelectorAll('.dot').forEach((dot, i) =>
+          dot.classList.toggle('active', i === index)
+        );
       });
-    }
 
-    $('swipeBox').addEventListener('scroll', () => {
-      const index = Math.round($('swipeBox').scrollLeft / $('swipeBox').clientWidth);
-      document.querySelectorAll('.dot').forEach((dot, i) => {
-        dot.classList.toggle('active', i === index);
-      });
-    });
+      $('exportButton').addEventListener('click', () => {
+        if (!entries.length) return alert('There are no entries to export.');
 
-    function csvCell(value) {
-      return `"${String(value ?? '').replace(/"/g, '""')}"`;
-    }
-
-    $('exportBtn').addEventListener('click', () => {
-      if (!entries.length) {
-        alert('No entries to export yet.');
-        return;
-      }
-
-      const rows = [
-        ['ID', 'Date', 'Time', 'Category', 'Notes', 'Mood', 'Discomfort', 'Pain'],
-        ...entries.map(entry => [
-          entry.id, entry.date, entry.time, entry.category, entry.notes,
-          entry.mood, entry.discomfort, entry.pain
-        ])
-      ];
-
-      const csv = '\uFEFF' + rows.map(row => row.map(csvCell).join(',')).join('\r\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `belly_tracker_${localDateString()}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    });
-
-    function parseCsv(text) {
-      const rows = [];
-      let row = [];
-      let cell = '';
-      let quoted = false;
-
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-
-        if (quoted) {
-          if (char === '"' && text[i + 1] === '"') {
-            cell += '"';
-            i++;
-          } else if (char === '"') {
-            quoted = false;
-          } else {
-            cell += char;
-          }
-        } else if (char === '"') {
-          quoted = true;
-        } else if (char === ',') {
-          row.push(cell);
-          cell = '';
-        } else if (char === '\n') {
-          row.push(cell);
-          rows.push(row);
-          row = [];
-          cell = '';
-        } else if (char !== '\r') {
-          cell += char;
-        }
-      }
-
-      if (cell.length || row.length) {
-        row.push(cell);
-        rows.push(row);
-      }
-
-      return rows;
-    }
-
-    $('importBtn').addEventListener('click', () => $('csvFileInput').click());
-
-    $('csvFileInput').addEventListener('change', async event => {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      try {
-        const rows = parseCsv((await file.text()).replace(/^\uFEFF/, ''));
-        if (rows.length < 2) throw new Error('The CSV file has no entries.');
-
-        const headers = rows[0].map(value => value.trim().toLowerCase());
-        const indexOf = name => headers.indexOf(name.toLowerCase());
-        const dateIndex = indexOf('date');
-        const timeIndex = indexOf('time');
-        const categoryIndex = indexOf('category');
-
-        if (dateIndex < 0 || timeIndex < 0 || categoryIndex < 0) {
-          throw new Error('CSV needs Date, Time, and Category columns.');
-        }
-
-        const imported = rows.slice(1).filter(row => row.some(value => value.trim())).map(row => {
-          const value = name => {
-            const index = indexOf(name);
-            return index < 0 ? '' : (row[index] || '').trim();
-          };
-
-          const category = value('category');
-          return {
-            id: value('id') || makeId(),
-            date: value('date'),
-            time: value('time'),
-            category: ['Food', 'Stool', 'Symptom', 'Medication', 'Note'].includes(category)
-              ? category : 'Note',
-            notes: value('notes'),
-            mood: validScore(value('mood'), 5),
-            discomfort: validScore(value('discomfort'), 1),
-            pain: validScore(value('pain'), 1)
-          };
+        const quote = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
+        const rows = [
+          ['ID', 'Date', 'Time', 'Category', 'Notes', 'Mood', 'Discomfort', 'Pain'],
+          ...entries.map(e => [e.id, e.date, e.time, e.category, e.notes, e.mood, e.discomfort, e.pain])
+        ];
+        const blob = new Blob(['\uFEFF' + rows.map(row => row.map(quote).join(',')).join('\r\n')], {
+          type: 'text/csv;charset=utf-8'
         });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `belly-tracker-${localDate()}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+      });
 
-        if (!imported.length) throw new Error('No entries found in the CSV.');
+      // Import replaces current entries after confirmation.
+      $('importButton').addEventListener('click', () => $('csvFile').click());
+      $('csvFile').addEventListener('change', async event => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-        if (confirm(`Import ${imported.length} entries? This will replace the entries currently in this app.`)) {
-          entries = imported;
-          saveData();
-          alert(`Imported ${imported.length} entries.`);
+        try {
+          const text = (await file.text()).replace(/^\uFEFF/, '');
+          const rows = text.trim().split(/\r?\n/).map(line =>
+            line.match(/("(?:""|[^"])*"|[^,]*)(,|$)/g)
+              ?.map(cell => cell.replace(/,$/, '').replace(/^"|"$/g, '').replace(/""/g, '"')) || []
+          );
+
+          const headers = (rows.shift() || []).map(value => value.trim().toLowerCase());
+          const col = name => headers.indexOf(name.toLowerCase());
+          const get = (row, name, fallback = '') => row[col(name)] ?? fallback;
+
+          if (col('date') < 0 || col('time') < 0 || col('category') < 0) {
+            throw new Error('CSV must include Date, Time, and Category columns.');
+          }
+
+          const imported = rows.filter(row => row.length > 1).map(row => ({
+            id: get(row, 'id') || makeId(),
+            date: get(row, 'date'),
+            time: get(row, 'time'),
+            category: get(row, 'category', 'Note'),
+            notes: get(row, 'notes'),
+            mood: Number(get(row, 'mood', 5)),
+            discomfort: Number(get(row, 'discomfort', 0)),
+            pain: Number(get(row, 'pain', 0))
+          }));
+
+          if (!imported.length) throw new Error('No entries found in that CSV.');
+          if (confirm(`Import ${imported.length} entries? This replaces the current list.`)) {
+            entries = imported;
+            saveEntries();
+          }
+        } catch (error) {
+          alert('Import failed: ' + error.message);
+        } finally {
+          event.target.value = '';
         }
-      } catch (error) {
-        alert(`Could not import CSV: ${error.message}`);
-      } finally {
-        event.target.value = '';
-      }
-    });
+      });
 
-    resetForm();
-    renderHistory();
-    renderCharts();
+      setDateTime();
+      updateScoreLabels();
+      renderEntries();
+      renderCharts();
+    })();
   </script>
 </body>
 </html>
